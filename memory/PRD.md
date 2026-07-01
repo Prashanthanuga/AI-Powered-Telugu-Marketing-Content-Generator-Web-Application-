@@ -44,3 +44,13 @@ Build a mobile-first AI web app that helps T.V Reddy Electronics (Thorrur, Telan
 ### P3
 - Facebook/Instagram auto-post (V2 roadmap)
 - Analytics dashboard, WhatsApp Business API
+
+## Implemented (2026-02-XX — v1.1)
+- **QR Code on Posters**: Toggle (None / Google Maps / WhatsApp) — generates scannable code embedded in the poster; QR links to `SHOP.maps` or `wa.me/919441066578`. Uses `qrcode` npm package.
+- **Auto Font-Fit**: Poster headline now auto-shrinks (48px → 20px) and wraps for long Telugu strings; guaranteed no overflow within poster bounds.
+- **PDF Export**: New "Download PDF" button alongside PNG; uses jsPDF with html2canvas capture. Square 200×200mm, Story 108×192mm.
+- **Product Image Crop Controls**: Zoom slider (0.5×–2.5×) + Horizontal/Vertical offset sliders (−30%/+30%) with live preview + Reset button. Only shown after upload.
+- **Trending Idea Radar**: New backend endpoint `/api/ideas` (Gemini) returns 6 fresh non-repeating Telugu angle ideas — varied categories, tones, angles (monsoon care, student, farmer, wedding gift, repair, etc.). Client passes recent offer history to avoid duplicates. Clicking an idea auto-fills the form (offer/category/tone/notes).
+
+## Test Results
+- iteration_2.json: 100% pass on backend + frontend for all v1.1 additions and regression on v1 endpoints. Zero console errors.

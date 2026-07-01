@@ -12,7 +12,7 @@ const ScorePill = ({ label, value }) => {
   const color = v >= 9 ? "bg-green-500" : v >= 7 ? "bg-yellow-500" : "bg-slate-400";
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</span>
       <span className={`inline-flex items-center h-5 min-w-[38px] px-1.5 rounded-full ${color} text-white text-[11px] font-bold justify-center`}>
         {v}/10
       </span>
