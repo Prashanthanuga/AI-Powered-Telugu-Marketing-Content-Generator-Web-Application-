@@ -133,7 +133,7 @@ const IdeaCard = ({ idea, onPick }) => {
       </div>
 
       {/* Category */}
-      <div className="text-sm font-bold text-[#0B3D91] leading-tight">
+      <div className="text-sm font-bold text-[#0B3D91] leading-tight font-telugu">
         {idea.category}
       </div>
 
@@ -144,7 +144,7 @@ const IdeaCard = ({ idea, onPick }) => {
 
       {/* Reasoning */}
       {idea.reasoning && (
-        <p className="text-xs md:text-sm text-slate-600 leading-relaxed">
+        <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-telugu">
           {idea.reasoning}
         </p>
       )}
@@ -162,7 +162,7 @@ const IdeaCard = ({ idea, onPick }) => {
       {idea.target_audience && (
         <div className="flex items-start gap-1.5 text-xs text-slate-600 mt-0.5">
           <Target size={13} strokeWidth={2.5} className="mt-0.5 shrink-0 text-slate-400" />
-          <span className="leading-snug">{idea.target_audience}</span>
+          <span className="leading-snug font-telugu">{idea.target_audience}</span>
         </div>
       )}
 

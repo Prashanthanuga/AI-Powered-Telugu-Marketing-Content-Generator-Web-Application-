@@ -208,8 +208,15 @@ RULES:
 - Vary CATEGORY across ideas (TV, Mobile, Refrigerator, Washing Machine, AC, Kitchen Appliance, Accessories, Home Appliance, TV Repair, DTH Connection).
 - Vary TONE across ideas (Festive, Urgent, Informative, Celebration, Friendly, Trust Building).
 - Avoid semantic duplicates of the "recent_offers" list provided by the user.
-- Titles + hooks in Telugu script (95% Telugu). Angle label + reasoning + target_audience in ENGLISH so shop owner reads them fast.
-- Reasoning must be crisp and local (1-2 sentences), citing why NOW and why for THIS audience.
+
+LANGUAGE RULES (VERY IMPORTANT):
+- `title`, `hook`, `category`, `reasoning`, and `target_audience` MUST ALL be in TELUGU SCRIPT (95% Telugu). Only brand names and unavoidable technical terms (Samsung, LG, TV, LED, Smart TV, EMI, WiFi, AC, DTH, UPS, Wi-Fi) stay in English.
+- Do NOT use Roman Telugu (Tenglish). Always Telugu script.
+- Reasoning: 1-2 sentences in Telugu explaining why NOW and why for THIS audience.
+- target_audience: crisp Telugu phrase describing the buyer.
+- `angle` label stays in English (short 2-4 words, used as a tag).
+- `tone` stays in English (must be exactly one of: Festive, Urgent, Informative, Celebration, Friendly, Trust Building).
+
 - Scores are self-rated 1-10:
   * relevance: how timely / how urgent this angle is right now
   * local: how locally relevant to Thorrur/nearby villages
@@ -220,11 +227,11 @@ OUTPUT: Return ONLY valid JSON, no markdown fences:
   "ideas": [
     {
       "angle": "short English angle label, max 4 words (e.g. 'Post-Harvest Celebration')",
-      "category": "product/service category with concise English descriptor (e.g. 'Smart LED TVs (4K & Android)')",
-      "title": "catchy Telugu title, max 12 words (Roman-Telugu subtitle allowed at end after a dash, optional)",
-      "hook": "one-line Telugu hook explaining the offer/angle, max 22 words",
-      "reasoning": "1-2 sentence English rationale — why now, why local, why this audience",
-      "target_audience": "English phrase like 'Farmers and rural families in Thorrur surroundings'",
+      "category": "Telugu product/service category descriptor (brand/tech terms allowed in English, e.g. 'Smart LED TV మరియు Android TV')",
+      "title": "catchy Telugu title, max 12 words in Telugu script",
+      "hook": "one-line Telugu hook explaining the offer/angle, max 22 words in Telugu script",
+      "reasoning": "1-2 sentence TELUGU rationale — why now, why local, why this audience",
+      "target_audience": "Telugu phrase describing the buyer (e.g. 'థొర్రూరు చుట్టుపక్కల రైతులు మరియు కుటుంబాలు')",
       "tone": "one of: Festive, Urgent, Informative, Celebration, Friendly, Trust Building",
       "scores": { "relevance": 10, "local": 10, "awareness": 9 }
     }

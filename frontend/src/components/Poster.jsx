@@ -84,7 +84,7 @@ export const Poster = React.forwardRef(({
 
       <div className={`relative z-10 h-full w-full flex flex-col p-6 md:p-8 ${isLightBg ? "text-slate-900" : "text-white"}`}>
         {/* Brand strip top */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between">
           <div>
             <div className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${isLightBg ? "text-[#F59E0B]" : "text-yellow-300"}`}>
               {tpl.nameT}
@@ -93,19 +93,15 @@ export const Poster = React.forwardRef(({
               T.V Reddy Electronics
             </div>
           </div>
-          <div className={`h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center ${isLightBg ? "bg-[#0B3D91]" : "bg-white/20 backdrop-blur border border-white/30"}`}>
-            <span className="text-lg md:text-xl font-black text-white">T</span>
-          </div>
         </div>
 
         {/* Product image — auto-contained placeholder */}
         {productImage && (
-          <div className="my-3 flex-1 flex items-center justify-center min-h-0 overflow-hidden rounded-xl">
+          <div className="my-3 flex-1 flex items-center justify-center min-h-[35%] overflow-hidden rounded-xl">
             <div className="relative h-full w-full flex items-center justify-center">
               <img
                 src={productImage}
                 alt="product"
-                crossOrigin="anonymous"
                 className="max-h-full max-w-full object-contain drop-shadow-2xl"
                 style={{
                   transform: `translate(${imgTransform.offsetX}%, ${imgTransform.offsetY}%) scale(${imgTransform.zoom})`,

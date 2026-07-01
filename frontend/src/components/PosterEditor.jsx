@@ -10,7 +10,16 @@ import { devError } from "@/utils/logger";
 
 const captureCanvas = async (node, scale) => {
   if (document.fonts?.ready) await document.fonts.ready;
-  return html2canvas(node, { scale, useCORS: true, backgroundColor: null, logging: false });
+  // Wait for all <img> inside the node to fully decode so html2canvas captures them
+  const imgs = Array.from(node.querySelectorAll("img"));
+  await Promise.all(imgs.map((img) => {
+    if (img.complete && img.naturalWidth) return img.decode ? img.decode().catch(() => {}) : Promise.resolve();
+    return new Promise((res) => {
+      img.onload = () => res();
+      img.onerror = () => res();
+    });
+  }));
+  return html2canvas(node, { scale, useCORS: true, allowTaint: true, backgroundColor: null, logging: false });
 };
 
 export const PosterEditor = ({ content, setContent }) => {
