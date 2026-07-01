@@ -1,0 +1,27 @@
+{
+  "summary": "First-finish smoke test on T.V Reddy Telugu marketing generator. Backend (generate/regenerate/history/delete) and frontend (form, tabs, poster templates, history drawer, regenerate) all working end-to-end with real Gemini 2.5 Flash output in Telugu script.",
+  "tested_scope": ["backend", "frontend", "integration"],
+  "passed": [
+    "GET /api/ returns 200",
+    "POST /api/generate with valid Samsung TV input returns full Telugu JSON with all 9 keys",
+    "POST /api/generate with short offer ('a') returns 400 'Offer description is required'",
+    "POST /api/history saves item and returns id; GET /api/history lists it; DELETE /api/history/{id} returns {deleted:1}",
+    "EMERGENT_LLM_KEY present in /app/backend/.env; Gemini integration produces Telugu-script output",
+    "Home page loads, header shows 'T.V Reddy Electronics'",
+    "All 7 form/action data-testids present (offer-input, category/audience/tone-select, notes-input, generate-btn, history-btn)",
+    "History drawer opens on click and shows [data-testid=history-drawer]",
+    "Generate flow: click generate -> content tabs render within 60s; toast 'Content generated successfully!' shown",
+    "WhatsApp tab has copy-whatsapp-btn and share-whatsapp-btn",
+    "FB & IG tab has copy-facebook-btn and copy-instagram-btn",
+    "Tagline tab has copy-tagline-btn",
+    "Poster tab renders all 6 template thumbnails (template-festival/emi/exchange/repair/spotlight/newstock) and download-poster-btn",
+    "Regenerate button present after generation",
+    "Zero console errors during load and full generation flow"
+  ],
+  "failed": [],
+  "action_items": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "retest_needed": false,
+  "full_testing_deferred": true,
+  "notes": "Did not verify actual clipboard-copy behavior, html2canvas PNG download bytes, or voice input (Web Speech API requires mic permissions). Regenerate button click-through not exercised end-to-end but endpoint verified via API path (regenerate reuses generate)."
+}

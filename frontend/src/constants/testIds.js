@@ -1,0 +1,30 @@
+export const HOME = {
+  emergentLink: "home-emergent-link",
+};
+
+export const APP = {
+  offerInput: "offer-input",
+  voiceBtn: "voice-input-btn",
+  categorySelect: "category-select",
+  audienceSelect: "audience-select",
+  toneSelect: "tone-select",
+  notesInput: "notes-input",
+  generateBtn: "generate-btn",
+  regenerateBtn: "regenerate-btn",
+  historyBtn: "history-btn",
+  templateSelect: "template-select",
+  downloadPosterBtn: "download-poster-btn",
+  shareWhatsappBtn: "share-whatsapp-btn",
+  copyWhatsappBtn: "copy-whatsapp-btn",
+  copyFacebookBtn: "copy-facebook-btn",
+  copyInstagramBtn: "copy-instagram-btn",
+  copyTaglineBtn: "copy-tagline-btn",
+  tabsList: "content-tabs-list",
+  tabWhatsapp: "tab-whatsapp",
+  tabSocial: "tab-social",
+  tabTagline: "tab-tagline",
+  tabPoster: "tab-poster",
+  posterPreview: "poster-preview",
+  progressBar: "progress-bar",
+  historyDrawer: "history-drawer",
+};
