@@ -181,6 +181,87 @@ async def generate_content(req: GenerateRequest):
     raise HTTPException(status_code=502, detail=f"AI generation failed. {last_err}")
 
 
+class IdeaRequest(BaseModel):
+    recent_offers: List[str] = []
+    count: int = 5
+
+class IdeaItem(BaseModel):
+    title: str
+    hook: str
+    category: str
+    tone: str
+    angle: str
+    reasoning: str = ""
+    target_audience: str = ""
+    scores: dict = {}
+
+class IdeaResponse(BaseModel):
+    ideas: List[IdeaItem]
+
+
+IDEA_SYSTEM_PROMPT = """You are a Telugu marketing strategist for T.V Reddy Electronics, a local electronics shop in Thorrur, Telangana (villages nearby: Mahabubabad, Maripeda, Narsimhulapet, Kesamudram, Dornakal). Buyers are farmers, families, students, government employees, first-time buyers.
+
+Your job: propose FRESH, LOCALLY-RELEVANT marketing angle ideas that consider the current month/season, farming cycle, festival calendar, cricket season, school year, weather, and social occasions — angles the shop owner has NOT posted recently.
+
+RULES:
+- Every idea targets a DIFFERENT angle from the others in the same response. Examples of angle labels: "Post-Harvest Celebration", "Summer AC Push", "Monsoon Appliance Care", "Wedding Gift Season", "Student Back-to-School", "Cricket World Cup TV Upgrade", "DTH Recharge Reminder", "Exchange Old for New", "EMI Comfort", "Farmer Utility", "Trust & After-Sales", "Weekend Family Deal", "New Product Launch", "First-Time Buyer Guide".
+- Vary CATEGORY across ideas (TV, Mobile, Refrigerator, Washing Machine, AC, Kitchen Appliance, Accessories, Home Appliance, TV Repair, DTH Connection).
+- Vary TONE across ideas (Festive, Urgent, Informative, Celebration, Friendly, Trust Building).
+- Avoid semantic duplicates of the "recent_offers" list provided by the user.
+- Titles + hooks in Telugu script (95% Telugu). Angle label + reasoning + target_audience in ENGLISH so shop owner reads them fast.
+- Reasoning must be crisp and local (1-2 sentences), citing why NOW and why for THIS audience.
+- Scores are self-rated 1-10:
+  * relevance: how timely / how urgent this angle is right now
+  * local: how locally relevant to Thorrur/nearby villages
+  * awareness: how much it lifts shop awareness / recall
+
+OUTPUT: Return ONLY valid JSON, no markdown fences:
+{
+  "ideas": [
+    {
+      "angle": "short English angle label, max 4 words (e.g. 'Post-Harvest Celebration')",
+      "category": "product/service category with concise English descriptor (e.g. 'Smart LED TVs (4K & Android)')",
+      "title": "catchy Telugu title, max 12 words (Roman-Telugu subtitle allowed at end after a dash, optional)",
+      "hook": "one-line Telugu hook explaining the offer/angle, max 22 words",
+      "reasoning": "1-2 sentence English rationale — why now, why local, why this audience",
+      "target_audience": "English phrase like 'Farmers and rural families in Thorrur surroundings'",
+      "tone": "one of: Festive, Urgent, Informative, Celebration, Friendly, Trust Building",
+      "scores": { "relevance": 10, "local": 10, "awareness": 9 }
+    }
+  ]
+}"""
+
+
+@api_router.post("/ideas", response_model=IdeaResponse)
+async def suggest_ideas(req: IdeaRequest):
+    session_id = f"idea-{uuid.uuid4()}"
+    count = max(3, min(req.count, 8))
+    recent_text = "\n".join(f"- {o}" for o in req.recent_offers[:20]) or "(none yet)"
+    now = datetime.now(timezone.utc)
+    ctx = f"Current date: {now.strftime('%B %d, %Y')} (month: {now.strftime('%B')}). Consider current season, farming cycle, and upcoming festivals when choosing angles."
+    user_prompt = f"""{ctx}
+
+Propose {count} FRESH marketing angle ideas. Each MUST have a DIFFERENT angle label, DIFFERENT category or tone, and be semantically different from these RECENT offers already posted:
+
+{recent_text}
+
+Return the JSON with exactly {count} rich idea objects (angle, category, title, hook, reasoning, target_audience, tone, scores)."""
+
+    last_err = None
+    for attempt in range(2):
+        try:
+            raw = await call_gemini(IDEA_SYSTEM_PROMPT, user_prompt, session_id)
+            data = extract_json(raw)
+            ideas = data.get("ideas", [])
+            if not isinstance(ideas, list) or len(ideas) == 0:
+                raise ValueError("no ideas")
+            return IdeaResponse(ideas=[IdeaItem(**i) for i in ideas[:count]])
+        except Exception as e:
+            last_err = str(e)
+            logger.warning(f"ideas attempt {attempt+1} failed: {e}")
+    raise HTTPException(status_code=502, detail=f"Idea generation failed. {last_err}")
+
+
 @api_router.post("/regenerate", response_model=GeneratedContent)
 async def regenerate_content(req: GenerateRequest):
     # Slight variation: append instruction to produce a different phrasing

@@ -1,0 +1,46 @@
+{
+  "summary": "All 5 new features validated end-to-end. Backend /api/ideas returns 6/3 fresh non-repeating Telugu ideas with variety in category/tone. Frontend Idea Radar renders, prefills the form, and shows toast. Poster editor QR toggle (off/maps/whatsapp), Download PDF, image crop sliders (zoom/offsetX/offsetY), and auto-fit long Telugu headline all working. Zero console errors. Existing generate/regenerate/history endpoints still pass.",
+  "tested_scope": ["backend", "frontend", "integration"],
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "passed": [
+    "POST /api/ideas count=6 → 6 items each with title/hook/category/tone/angle, Telugu script present, ≥2 distinct categories and ≥2 distinct tones",
+    "POST /api/ideas with empty recent_offers → valid ideas array (≥3)",
+    "POST /api/ideas with count=3 → exactly 3 ideas",
+    "POST /api/generate, POST /api/regenerate regression → 200 with all 9 Telugu keys",
+    "POST /api/history + GET /api/history + DELETE /api/history/{id} regression → all 200 with correct persistence",
+    "Home page renders IdeaRadar (data-testid=idea-radar-btn) BELOW the input form (y=1283 > y=1052)",
+    "Clicking idea-radar-btn shows Scanning state, then idea-radar-panel with 6 idea-card buttons rendered",
+    "Each idea-card shows angle, title (Telugu), hook (Telugu), category · tone",
+    "Clicking an idea-card prefills offer-input (Telugu title), category-select (e.g. 'TV Repair'), tone-select (e.g. 'Trust Building') and notes/hook — 'Idea loaded into the form!' toast shown",
+    "Poster tab: qr-toggle group renders qr-off, qr-maps, qr-whatsapp buttons",
+    "qr-maps (default) renders <img alt=QR> with 'Scan for Map' label",
+    "qr-whatsapp renders QR + 'Scan for WhatsApp' label",
+    "qr-off removes QR image completely",
+    "Both download-poster-btn (PNG) and download-pdf-btn present side-by-side",
+    "Clicking Download PDF triggers real file download (tvreddy-festival-square-2026-07-01.pdf)",
+    "Product image upload reveals img-zoom, img-offset-x, img-offset-y sliders",
+    "Slider changes update product image transform in real time: zoom=1.8 → scale(1.8); offsetX=15 → translate(15%, ...); offsetY=-10 → translate(..., -10%)",
+    "Long Telugu headline (78 chars) stays within poster bounds — width 384 ≤ 448, font auto-shrinks from 48→44px and wraps",
+    "Zero console errors during entire flow (generate → poster → QR toggles → sliders → PDF download)"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_ideas_and_regression.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "PosterEditor.jsx defaults qrMode='maps' — request only says 'toggle group has 3 buttons'; default-on is fine but consider if 'off' should be default for privacy on some templates. Minor UX opinion, not a bug.",
+    "FitHeadline uses character-count heuristic (not real DOM measurement). Works well for tested cases including 78-char Telugu strings, but very tall stacked wraps could still slightly overflow container height when subtitle+CTA+footer are also tall. Consider a ResizeObserver-based fitter later for extreme cases.",
+    "IdeaRadar prefill sends idea.tone/category as raw strings — must match values in TONES/CATEGORIES constants. Verified working for 'TV Repair'/'Trust Building'; if backend returns values not in the select options the <select> silently falls back to first item.",
+    "server.py IDEA endpoint hard-clamps count to [3,8]; documented in code but not returned in response. Fine."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_ideas_and_regression.py (new)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "None — history test creates and cleans up its own TEST_ item",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 2 validated all NEW features from the review: /api/ideas endpoint, Trending Idea Radar UI + prefill, QR toggle (maps/whatsapp/off), Download PDF, image crop sliders, auto-fit Telugu headline. All 6 pytest tests pass in ~30s. Range sliders in React need native input value setter to fire onChange from Playwright (see test script pattern)."
+}

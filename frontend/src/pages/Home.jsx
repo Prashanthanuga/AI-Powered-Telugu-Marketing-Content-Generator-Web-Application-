@@ -6,6 +6,7 @@ import { InputForm } from "@/components/InputForm";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ContentTabs } from "@/components/ContentTabs";
 import { HistoryDrawer } from "@/components/HistoryDrawer";
+import { IdeaRadar } from "@/components/IdeaRadar";
 import { loadHistory, saveHistoryItem, deleteHistoryItem, findSimilar } from "@/utils/localHistory";
 import { SHOP, PROGRESS_STEPS } from "@/utils/constants";
 import { Zap, MapPin, Phone } from "lucide-react";
@@ -20,6 +21,7 @@ export default function Home() {
   const [lastRequest, setLastRequest] = useState(null);
   const [history, setHistory] = useState([]);
   const [regenerating, setRegenerating] = useState(false);
+  const [prefill, setPrefill] = useState(null);
 
   useEffect(() => {
     setHistory(loadHistory());
@@ -135,10 +137,18 @@ export default function Home() {
           </p>
         </section>
 
+        {/* Idea Radar (top position) */}
+        {!loading && (
+          <IdeaRadar
+            recentOffers={history.slice(0, 20).map((h) => h.offer)}
+            onPick={(p) => setPrefill({ ...p, _t: Date.now() })}
+          />
+        )}
+
         {/* Form Card */}
         {!loading && (
           <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 md:p-7">
-            <InputForm onGenerate={handleGenerate} loading={loading || regenerating} />
+            <InputForm onGenerate={handleGenerate} loading={loading || regenerating} prefill={prefill} />
           </section>
         )}
 

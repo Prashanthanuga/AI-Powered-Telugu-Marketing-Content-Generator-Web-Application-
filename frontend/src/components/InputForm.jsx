@@ -6,7 +6,7 @@ import { APP } from "@/constants/testIds";
 import { saveDraft, loadDraft } from "@/utils/localHistory";
 import { upcomingFestival } from "@/utils/festivalHelper";
 
-export const InputForm = ({ onGenerate, loading }) => {
+export const InputForm = ({ onGenerate, loading, prefill }) => {
   const [offer, setOffer] = useState("");
   const [category, setCategory] = useState("TV");
   const [audience, setAudience] = useState("Families");
@@ -27,6 +27,17 @@ export const InputForm = ({ onGenerate, loading }) => {
     const fest = upcomingFestival();
     if (fest && !d) setTone("Festive");
   }, []);
+
+  // Apply prefill from IdeaRadar
+  useEffect(() => {
+    if (!prefill) return;
+    if (prefill.offer !== undefined) setOffer(prefill.offer);
+    if (prefill.category) setCategory(prefill.category);
+    if (prefill.tone) setTone(prefill.tone);
+    if (prefill.special_notes !== undefined) setNotes(prefill.special_notes);
+    // Smooth scroll form into view
+    setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
+  }, [prefill]);
 
   // Auto-save draft
   useEffect(() => {
