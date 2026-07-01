@@ -12,7 +12,7 @@ export const ProgressBar = ({ step }) => {
           const done = idx < step;
           const active = idx === step;
           return (
-            <div key={idx} className="flex items-center gap-3">
+            <div key={label} className="flex items-center gap-3">
               <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
                 done ? "bg-green-100 text-green-600" : active ? "bg-blue-100 text-[#0B3D91]" : "bg-slate-100 text-slate-400"
               }`}>

@@ -6,6 +6,7 @@ import { TEMPLATES } from "@/utils/constants";
 import { Download, Upload, Trash2, RefreshCw, QrCode, FileText, ZoomIn, Move } from "lucide-react";
 import { toast } from "sonner";
 import { APP } from "@/constants/testIds";
+import { devError } from "@/utils/logger";
 
 const captureCanvas = async (node, scale) => {
   if (document.fonts?.ready) await document.fonts.ready;
@@ -52,7 +53,7 @@ export const PosterEditor = ({ content, setContent }) => {
       link.click();
       toast.success("Poster PNG downloaded!");
     } catch (e) {
-      console.error(e);
+      devError(e);
       toast.error("Poster download failed. Please try again.");
     } finally {
       setDownloading(false);
@@ -73,7 +74,7 @@ export const PosterEditor = ({ content, setContent }) => {
       pdf.save(`tvreddy-${template}-${size}-${new Date().toISOString().slice(0, 10)}.pdf`);
       toast.success("Poster PDF downloaded!");
     } catch (e) {
-      console.error(e);
+      devError(e);
       toast.error("PDF export failed. Please try again.");
     } finally {
       setPdfBusy(false);

@@ -100,8 +100,8 @@ export const ContentTabs = ({ content, setContent, onRegenerate, regenerating })
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
               <h3 className="text-lg font-bold text-slate-900 mb-3 font-heading">Hashtags</h3>
               <div className="flex flex-wrap gap-2">
-                {(content.hashtags || []).map((h, i) => (
-                  <span key={i} className="px-3 py-1.5 bg-blue-50 text-[#0B3D91] rounded-full text-sm font-semibold font-telugu">
+                {(content.hashtags || []).map((h) => (
+                  <span key={h} className="px-3 py-1.5 bg-blue-50 text-[#0B3D91] rounded-full text-sm font-semibold font-telugu">
                     {h.startsWith("#") ? h : "#" + h}
                   </span>
                 ))}

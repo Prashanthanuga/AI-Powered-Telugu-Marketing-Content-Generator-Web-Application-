@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Mic, Square } from "lucide-react";
 import { APP } from "@/constants/testIds";
+import { devWarn } from "@/utils/logger";
 
 /**
  * Voice input button using browser Web Speech API (Telugu te-IN).
@@ -42,11 +43,11 @@ export const VoiceInput = ({ onResult, disabled }) => {
       // Reset auto-stop silence timer
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = setTimeout(() => {
-        try { rec.stop(); } catch (e) { /* ignore */ }
+        try { rec.stop(); } catch (err) { devWarn("VoiceInput silence-stop ignored:", err); }
       }, 1800);
     };
     rec.onerror = (e) => {
-      console.warn("SpeechRecognition error:", e.error || e);
+      devWarn("SpeechRecognition error:", e.error || e);
     };
     rec.onend = () => {
       setListening(false);
@@ -58,7 +59,7 @@ export const VoiceInput = ({ onResult, disabled }) => {
     recognitionRef.current = rec;
     return () => {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      try { rec.stop(); } catch (e) { /* ignore */ }
+      try { rec.stop(); } catch (err) { devWarn("VoiceInput unmount-stop ignored:", err); }
     };
   }, [onResult]);
 
@@ -66,7 +67,7 @@ export const VoiceInput = ({ onResult, disabled }) => {
 
   const toggle = () => {
     if (listening) {
-      try { recognitionRef.current?.stop(); } catch (e) { /* ignore */ }
+      try { recognitionRef.current?.stop(); } catch (err) { devWarn("VoiceInput toggle-stop ignored:", err); }
       setListening(false);
       return;
     }
@@ -75,7 +76,7 @@ export const VoiceInput = ({ onResult, disabled }) => {
     try {
       recognitionRef.current?.start();
       setListening(true);
-    } catch (e) { setListening(false); }
+    } catch (err) { devWarn("VoiceInput start failed:", err); setListening(false); }
   };
 
   return (

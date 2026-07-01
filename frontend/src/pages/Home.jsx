@@ -7,6 +7,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { ContentTabs } from "@/components/ContentTabs";
 import { HistoryDrawer } from "@/components/HistoryDrawer";
 import { IdeaRadar } from "@/components/IdeaRadar";
+import { devError } from "@/utils/logger";
 import { loadHistory, saveHistoryItem, deleteHistoryItem, findSimilar } from "@/utils/localHistory";
 import { SHOP, PROGRESS_STEPS } from "@/utils/constants";
 import { Zap, MapPin, Phone } from "lucide-react";
@@ -78,7 +79,7 @@ export default function Home() {
       } else {
         toast.error("Content generation failed. Please try again.");
       }
-      console.error(e);
+      devError(e);
     } finally {
       setLoading(false);
       setRegenerating(false);

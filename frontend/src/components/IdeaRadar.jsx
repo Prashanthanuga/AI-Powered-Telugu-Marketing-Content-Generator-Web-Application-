@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Radar, Sparkle, ArrowRight, RefreshCw, MapPin, Target } from "lucide-react";
+import { Radar, Sparkle, ArrowRight, RefreshCw, Target } from "lucide-react";
 import { toast } from "sonner";
 import { APP } from "@/constants/testIds";
+import { devError } from "@/utils/logger";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -38,7 +39,7 @@ export const IdeaRadar = ({ recentOffers = [], onPick, autoLoad = true }) => {
       setIdeas(resp.data.ideas || []);
       setHasLoaded(true);
     } catch (e) {
-      console.error(e);
+      devError(e);
       toast.error("Couldn't fetch ideas. Please try again.");
     } finally {
       setLoading(false);
@@ -105,7 +106,7 @@ export const IdeaRadar = ({ recentOffers = [], onPick, autoLoad = true }) => {
       {ideas.length > 0 && (
         <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-3" data-testid={APP.ideaRadarPanel}>
           {ideas.map((idea, idx) => (
-            <IdeaCard key={idx} idea={idea} onPick={pick} />
+            <IdeaCard key={`${idea.angle || "idea"}-${idx}`} idea={idea} onPick={pick} />
           ))}
         </div>
       )}
@@ -178,16 +179,29 @@ const IdeaCard = ({ idea, onPick }) => {
 };
 
 // Map LLM's flexible category descriptor back to our dropdown values
+const CATEGORY_KEYWORDS = [
+  ["repair", "TV Repair"],
+  ["dth", "DTH Connection"],
+  ["dish", "DTH Connection"],
+  ["recharge", "DTH Connection"],
+  ["tv", "TV"],
+  ["mobile", "Mobile"],
+  ["smartphone", "Mobile"],
+  ["phone", "Mobile"],
+  ["refrigerator", "Refrigerator"],
+  ["fridge", "Refrigerator"],
+  ["washing", "Washing Machine"],
+  ["ac", "AC"],
+  ["air condition", "AC"],
+  ["cooler", "AC"],
+  ["kitchen", "Kitchen Appliance"],
+  ["mixer", "Kitchen Appliance"],
+  ["accessor", "Accessories"],
+  ["fan", "Accessories"],
+];
+
 function normalizeCategory(cat) {
   const s = (cat || "").toLowerCase();
-  if (s.includes("repair")) return "TV Repair";
-  if (s.includes("dth") || s.includes("dish") || s.includes("recharge")) return "DTH Connection";
-  if (s.includes("tv")) return "TV";
-  if (s.includes("mobile") || s.includes("smartphone") || s.includes("phone")) return "Mobile";
-  if (s.includes("refrigerator") || s.includes("fridge")) return "Refrigerator";
-  if (s.includes("washing")) return "Washing Machine";
-  if (s.includes("ac") || s.includes("air condition") || s.includes("cooler")) return "AC";
-  if (s.includes("kitchen") || s.includes("mixer")) return "Kitchen Appliance";
-  if (s.includes("accessor") || s.includes("fan")) return "Accessories";
-  return "Home Appliance";
+  const match = CATEGORY_KEYWORDS.find(([k]) => s.includes(k));
+  return match ? match[1] : "Home Appliance";
 }
