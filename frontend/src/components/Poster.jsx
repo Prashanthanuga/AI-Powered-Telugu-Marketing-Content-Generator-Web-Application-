@@ -4,36 +4,44 @@ import { SHOP, TEMPLATES } from "@/utils/constants";
 import { Phone, MapPin } from "lucide-react";
 
 /**
- * Measure-based auto-fit headline. Iteratively shrinks font size and
- * enables wrapping until it fits inside the parent container.
+ * Measure-based auto-fit headline. Shrinks font-size until the text fits
+ * BOTH the available width AND the parent height budget.
  */
-const FitHeadline = ({ text, maxPx = 56, minPx = 18, className = "" }) => {
+const FitHeadline = ({ text, maxPx = 40, minPx = 14, maxLines = 3, className = "" }) => {
   const ref = useRef(null);
   const [size, setSize] = useState(maxPx);
 
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    let s = maxPx;
-    el.style.fontSize = `${s}px`;
-    // Shrink until width + height fit the container
     const parent = el.parentElement;
     if (!parent) return;
-    // Give it 3-line max height budget
-    const maxHeight = s * 3.2;
-    let guard = 40;
-    while (guard-- > 0 && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > maxHeight) && s > minPx) {
-      s -= 2;
+
+    let s = maxPx;
+    el.style.fontSize = `${s}px`;
+
+    let guard = 60;
+    while (guard-- > 0 && s > minPx) {
+      const parentH = parent.clientHeight;
+      const lineH = s * 1.12;
+      const budget = Math.min(parentH, lineH * maxLines);
+      if (el.scrollWidth <= el.clientWidth + 1 && el.scrollHeight <= budget + 1) break;
+      s -= 1;
       el.style.fontSize = `${s}px`;
     }
     setSize(s);
-  }, [text, maxPx, minPx]);
+  }, [text, maxPx, minPx, maxLines]);
 
   return (
     <h1
       ref={ref}
-      className={`font-black leading-[1.05] tracking-tight break-words ${className}`}
-      style={{ fontSize: `${size}px`, wordBreak: "break-word", hyphens: "auto" }}
+      className={`font-black leading-[1.08] tracking-tight ${className}`}
+      style={{
+        fontSize: `${size}px`,
+        wordBreak: "break-word",
+        overflowWrap: "anywhere",
+        hyphens: "auto",
+      }}
     >
       {text || "మీ కోసం ప్రత్యేక ఆఫర్"}
     </h1>
@@ -41,8 +49,11 @@ const FitHeadline = ({ text, maxPx = 56, minPx = 18, className = "" }) => {
 };
 
 /**
- * Auto-fit uploaded photo — img is always contained inside the placeholder
- * (object-fit: contain) and the user's zoom/offset transform layers on top.
+ * Fixed proportional layout so headline never overlaps image or footer:
+ *   ~9%  brand strip
+ *   ~40% product image (only if uploaded)
+ *   ~35% headline + subtitle
+ *   ~16% CTA + QR + phone/location footer
  */
 export const Poster = React.forwardRef(({
   template,
@@ -72,6 +83,13 @@ export const Poster = React.forwardRef(({
 
   const headlineColor = isLightBg ? "text-[#0B3D91]" : "text-white";
   const subColor = isLightBg ? "text-slate-700" : "text-white/90";
+  const footerBorder = isLightBg ? "border-slate-300" : "border-white/30";
+
+  const hasImage = Boolean(productImage);
+  // Percentage-based row budget (content area between top brand and bottom footer)
+  const imageBasis = hasImage ? (isStory ? "40%" : "36%") : "0%";
+  const textBasis = hasImage ? (isStory ? "36%" : "40%") : "100%";
+  const headlineMax = isStory ? 46 : 38;
 
   return (
     <div
@@ -82,80 +100,92 @@ export const Poster = React.forwardRef(({
       <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10 blur-2xl" />
       <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-black/10 blur-3xl" />
 
-      <div className={`relative z-10 h-full w-full flex flex-col p-6 md:p-8 ${isLightBg ? "text-slate-900" : "text-white"}`}>
-        {/* Brand strip top */}
-        <div className="flex items-start justify-between">
-          <div>
-            <div className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${isLightBg ? "text-[#F59E0B]" : "text-yellow-300"}`}>
-              {tpl.nameT}
-            </div>
-            <div className={`text-base md:text-lg font-extrabold mt-0.5 leading-tight ${isLightBg ? "text-[#0B3D91]" : ""}`}>
-              T.V Reddy Electronics
-            </div>
+      <div className={`relative z-10 h-full w-full flex flex-col p-5 md:p-6 ${isLightBg ? "text-slate-900" : "text-white"}`}>
+        {/* Row 1: brand strip */}
+        <header className="shrink-0">
+          <div className={`text-[9px] md:text-[11px] font-bold uppercase tracking-widest ${isLightBg ? "text-[#F59E0B]" : "text-yellow-300"}`}>
+            {tpl.nameT}
           </div>
-        </div>
+          <div className={`text-sm md:text-base font-extrabold leading-tight mt-0.5 ${isLightBg ? "text-[#0B3D91]" : ""}`}>
+            T.V Reddy Electronics
+          </div>
+        </header>
 
-        {/* Product image — auto-contained placeholder */}
-        {productImage && (
-          <div className="my-3 flex-1 flex items-center justify-center min-h-[35%] overflow-hidden rounded-xl">
-            <div className="relative h-full w-full flex items-center justify-center">
-              <img
-                src={productImage}
-                alt="product"
-                className="max-h-full max-w-full object-contain drop-shadow-2xl"
-                style={{
-                  transform: `translate(${imgTransform.offsetX}%, ${imgTransform.offsetY}%) scale(${imgTransform.zoom})`,
-                  transformOrigin: "center",
-                  transition: "transform 120ms ease-out",
-                }}
-              />
-            </div>
+        {/* Row 2: product image */}
+        {hasImage && (
+          <div
+            className="flex items-center justify-center overflow-hidden rounded-xl my-2 shrink-0"
+            style={{ flexBasis: imageBasis, minHeight: 0 }}
+          >
+            <img
+              src={productImage}
+              alt="product"
+              className="max-h-full max-w-full object-contain drop-shadow-xl"
+              style={{
+                transform: `translate(${imgTransform.offsetX}%, ${imgTransform.offsetY}%) scale(${imgTransform.zoom})`,
+                transformOrigin: "center",
+                transition: "transform 120ms ease-out",
+              }}
+            />
           </div>
         )}
-        {!productImage && <div className="flex-1" />}
 
-        {/* Headline + Sub */}
-        <div className="mt-auto">
+        {/* Row 3: headline + subtitle (flexible, absorbs remaining space) */}
+        <div
+          className="flex flex-col justify-end overflow-hidden min-h-0"
+          style={{ flexBasis: textBasis, flexGrow: 1 }}
+        >
           <FitHeadline
             text={content?.poster_headline || ""}
-            maxPx={isStory ? 60 : 48}
-            minPx={18}
+            maxPx={headlineMax}
+            minPx={14}
+            maxLines={hasImage ? 2 : 3}
             className={headlineColor}
           />
-          <p className={`mt-2 text-sm md:text-lg font-medium ${subColor} leading-snug break-words`}>
-            {content?.poster_subtitle || "T.V Reddy Electronics లో ఇప్పుడే సందర్శించండి"}
+          <p
+            className={`mt-1.5 text-xs md:text-sm font-medium ${subColor} leading-snug`}
+            style={{
+              wordBreak: "break-word",
+              overflowWrap: "anywhere",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {content?.poster_subtitle || "తొర్రూరులో ఇప్పుడే సందర్శించండి"}
           </p>
-
-          <div className="mt-4 flex items-end justify-between gap-3">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#F59E0B] text-white text-xs md:text-sm font-bold shadow-lg">
-              {content?.cta || "ఇప్పుడే సందర్శించండి"}
-            </div>
-            {qrDataUrl && (
-              <div className="flex flex-col items-center gap-1">
-                <img src={qrDataUrl} alt="QR" className="h-16 w-16 md:h-20 md:w-20 rounded-md bg-white p-1 shadow-md" />
-                <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-wide ${isLightBg ? "text-slate-600" : "text-white/80"}`}>
-                  {qrMode === "maps" ? "Scan for Map" : "Scan for WhatsApp"}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Brand footer */}
-          <div className={`mt-4 pt-3 border-t ${isLightBg ? "border-slate-300" : "border-white/30"} flex items-center justify-between gap-2 text-[11px] md:text-sm font-semibold`}>
-            <div className="flex items-center gap-1.5">
-              <Phone size={14} strokeWidth={2.5} />
-              <span>{SHOP.phone}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <MapPin size={14} strokeWidth={2.5} />
-              <span>Thorrur, Telangana</span>
-            </div>
-          </div>
         </div>
+
+        {/* Row 4: CTA + QR */}
+        <div className="shrink-0 mt-2 flex items-end justify-between gap-3">
+          <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-[#F59E0B] text-white text-[11px] md:text-xs font-bold shadow-lg max-w-[65%]">
+            <span className="truncate">{content?.cta || "ఇప్పుడే సందర్శించండి"}</span>
+          </div>
+          {qrDataUrl && (
+            <div className="flex flex-col items-center gap-0.5 shrink-0">
+              <img src={qrDataUrl} alt="QR" className="h-14 w-14 md:h-16 md:w-16 rounded-md bg-white p-1 shadow-md" />
+              <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-wide ${isLightBg ? "text-slate-600" : "text-white/80"}`}>
+                {qrMode === "maps" ? "Scan · Map" : "Scan · WhatsApp"}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Row 5: phone + location footer */}
+        <footer className={`shrink-0 mt-2 pt-2 border-t ${footerBorder} flex items-center justify-between gap-2 text-[10px] md:text-xs font-semibold`}>
+          <div className="flex items-center gap-1">
+            <Phone size={12} strokeWidth={2.5} />
+            <span>{SHOP.phone}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <MapPin size={12} strokeWidth={2.5} />
+            <span>తొర్రూరు, తెలంగాణ</span>
+          </div>
+        </footer>
       </div>
     </div>
   );
 });
 
 Poster.displayName = "Poster";
-
