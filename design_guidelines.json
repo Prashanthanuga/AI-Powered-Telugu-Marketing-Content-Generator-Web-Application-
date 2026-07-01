@@ -1,0 +1,127 @@
+{
+  "theme": "light",
+  "archetype": "Archetype 4 (High-Contrast/Utility) blended with warm local trust",
+  "global_design_rules": {
+    "philosophy": "Accessible, mobile-first utility for older demographic (35-60) in Telangana. High trust, extreme clarity, zero friction. Culturally resonant but not cluttered.",
+    "accessibility": {
+      "touch_targets": "Minimum 48px height for all interactive elements. Preferred 56px for primary actions.",
+      "spacing": "Generous padding (p-4 to p-6) within cards. Minimum 16px gap between clickable items.",
+      "contrast": "Strict WCAG AA adherence. Avoid relying solely on color to convey state.",
+      "cognitive_load": "Linear flows. Single-column layouts. Clear, descriptive labels in Telugu/English."
+    }
+  },
+  "typography": {
+    "font_families": {
+      "heading": "'Anek Telugu', sans-serif",
+      "body": "'Noto Sans Telugu', sans-serif"
+    },
+    "hierarchy": {
+      "h1": "text-3xl md:text-4xl font-bold tracking-tight text-slate-900",
+      "h2": "text-2xl md:text-3xl font-bold tracking-tight text-slate-800",
+      "h3": "text-xl md:text-2xl font-semibold text-slate-800",
+      "body_large": "text-lg md:text-xl text-slate-700 leading-relaxed",
+      "body_base": "text-base md:text-lg text-slate-600 leading-relaxed",
+      "labels": "text-sm md:text-base font-semibold text-slate-500 uppercase tracking-wider"
+    },
+    "notes": "Base font size should effectively act as 18px (text-lg in standard Tailwind) for maximum readability for older users."
+  },
+  "colors": {
+    "background": {
+      "default": "#FFFFFF",
+      "surface": "#F8FAFC",
+      "surface_alt": "#F1F5F9"
+    },
+    "primary": {
+      "DEFAULT": "#0B3D91",
+      "foreground": "#FFFFFF",
+      "hover": "#093070"
+    },
+    "accent": {
+      "DEFAULT": "#F59E0B",
+      "foreground": "#FFFFFF",
+      "hover": "#D97706"
+    },
+    "text": {
+      "primary": "#0F172A",
+      "secondary": "#334155",
+      "muted": "#64748B"
+    },
+    "border": "#E2E8F0",
+    "status": {
+      "success": "#16A34A",
+      "error": "#DC2626",
+      "warning": "#EA580C"
+    }
+  },
+  "layout": {
+    "container": "w-full max-w-2xl mx-auto px-4 sm:px-6 py-6 md:py-8",
+    "spacing_scale": "Use p-4, p-6 for containers. gap-4, gap-6 for lists. mb-6, mb-8 for section spacing.",
+    "surface_styles": {
+      "card": "bg-white rounded-2xl border border-slate-200 shadow-sm p-5 md:p-6",
+      "input_container": "bg-slate-50 rounded-xl border-2 border-slate-200 focus-within:border-primary focus-within:bg-white transition-colors"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "h-14 px-6 bg-[#0B3D91] hover:bg-[#093070] text-white text-lg font-bold rounded-xl shadow-md active:scale-[0.98] transition-transform flex items-center justify-center gap-2",
+      "secondary": "h-14 px-6 bg-slate-100 hover:bg-slate-200 text-slate-800 text-lg font-semibold rounded-xl active:scale-[0.98] transition-transform flex items-center justify-center gap-2",
+      "accent": "h-14 px-6 bg-[#F59E0B] hover:bg-[#D97706] text-white text-lg font-bold rounded-xl shadow-md active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+    },
+    "inputs": {
+      "text": "h-14 w-full bg-transparent text-lg text-slate-900 placeholder:text-slate-400 px-4 focus:outline-none",
+      "textarea": "w-full min-h-[120px] bg-transparent text-lg text-slate-900 placeholder:text-slate-400 p-4 focus:outline-none resize-none",
+      "voice_button": "h-12 w-12 flex items-center justify-center rounded-full bg-slate-100 text-[#0B3D91] hover:bg-[#0B3D91] hover:text-white transition-colors m-1"
+    },
+    "tabs": {
+      "list": "flex w-full bg-slate-100 p-1.5 rounded-xl overflow-x-auto hide-scrollbar",
+      "trigger": "flex-1 min-w-[100px] h-12 flex items-center justify-center text-base font-semibold rounded-lg text-slate-600 data-[state=active]:bg-white data-[state=active]:text-[#0B3D91] data-[state=active]:shadow-sm transition-all"
+    },
+    "poster_preview": {
+      "container": "relative w-full aspect-square bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 shadow-inner",
+      "overlay_text": "absolute inset-0 flex flex-col items-center justify-center p-6 text-center break-words"
+    }
+  },
+  "icons": {
+    "library": "lucide-react",
+    "stroke_width": 2.5,
+    "sizes": {
+      "default": 24,
+      "large": 32,
+      "small": 20
+    }
+  },
+  "motion": {
+    "transitions": "transition-all duration-200 ease-in-out",
+    "active_states": "active:scale-[0.98]",
+    "loading": "animate-pulse"
+  },
+  "media": {
+    "images": [
+      {
+        "category": "poster_backgrounds",
+        "description": "Festive / Diwali Background for Festival Offers",
+        "url": "https://images.unsplash.com/photo-1649437662540-36470c1ebd86?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzV8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBmZXN0aXZhbCUyMGJhY2tncm91bmQlMjBkaXdhbGklMjBvcmFuZ2UlMjBnb2xkfGVufDB8fHx8MTc4MjkyOTY0MHww&ixlib=rb-4.1.0&q=85"
+      },
+      {
+        "category": "poster_backgrounds",
+        "description": "Electronics Repair Technician Background",
+        "url": "https://images.pexels.com/photos/38145576/pexels-photo-38145576.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      },
+      {
+        "category": "poster_backgrounds",
+        "description": "Electronics Store / General Stock Background",
+        "url": "https://images.unsplash.com/photo-1441095179793-e2c059a90f56?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwyfHxlbGVjdHJvbmljcyUyMHNob3AlMjBhcHBsaWFuY2VzJTIwdHYlMjByZWZyaWdlcmF0b3J8ZW58MHx8fHwxNzgyOTI5NjQwfDA&ixlib=rb-4.1.0&q=85"
+      }
+    ],
+    "usage_rules": "Use images as background layers with heavy dark or branded overlays (e.g., bg-black/60 or bg-[#0B3D91]/80) to ensure high-contrast white text legibility for the posters."
+  },
+  "instructions_to_main_agent": [
+    "Ensure all interactive elements have a minimum height of 48px, preferably using the predefined h-14 (56px) utility classes for buttons and inputs.",
+    "Use lucide-react icons exclusively, with a strokeWidth of 2.5 to match the bold typography and accessible feel.",
+    "Implement the voice input microphone icon securely embedded within or immediately adjacent to the input field container, ensuring it is highly visible.",
+    "For the 6 poster templates, use a combination of pure CSS styling and background images (from the media section) over a fixed aspect-ratio container (aspect-square for 1080x1080).",
+    "Ensure Shadcn components are modified to remove 'Inter' font defaults, injecting 'Anek Telugu' for headings and 'Noto Sans Telugu' for body text.",
+    "Add data-testid attributes to all form inputs, buttons, and tab triggers to ensure testing stability.",
+    "Avoid complex scrollable areas within scrollable areas. The mobile view should feel native, stacking sequentially."
+  ]
+}
