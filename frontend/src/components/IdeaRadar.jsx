@@ -74,6 +74,7 @@ export const IdeaRadar = ({ recentOffers = [], onPick, autoLoad = true }) => {
     } else {
       fetchIdeas(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const pick = (idea) => {
