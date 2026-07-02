@@ -45,4 +45,6 @@ yarn install
 # Start the frontend development server
 yarn start
 \`\`\`
+---
+&copy; 2026 Prashanth Reddy. All rights reserved.
 *(Note: You will also need to create a `.env` file in the `frontend` folder if your React app requires any specific environment variables.)*

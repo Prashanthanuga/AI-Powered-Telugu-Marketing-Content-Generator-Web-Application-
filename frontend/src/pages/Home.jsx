@@ -28,8 +28,16 @@ export default function Home() {
     setHistory(loadHistory());
   }, []);
 
+  // NEW: Auto-scroll to results when content finishes generating
+  useEffect(() => {
+    if (content && !loading) {
+      setTimeout(() => {
+        document.getElementById("result-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, [content, loading]);
+
   const runGeneration = async (data, isRegen = false) => {
-    // Warn if similar recent
     if (!isRegen) {
       const similar = findSimilar(data.offer, history);
       if (similar) {
@@ -44,7 +52,6 @@ export default function Home() {
     if (isRegen) setRegenerating(true); else setLoading(true);
     setStep(0);
 
-    // Animate steps
     const stepTimer = setInterval(() => {
       setStep((s) => Math.min(s + 1, PROGRESS_STEPS.length - 1));
     }, 4000);
@@ -56,7 +63,6 @@ export default function Home() {
       setStep(PROGRESS_STEPS.length);
       setContent(resp.data);
 
-      // Save to local + server history
       const item = {
         id: crypto.randomUUID?.() || String(Date.now()),
         date: new Date().toISOString(),
@@ -65,7 +71,6 @@ export default function Home() {
         content: resp.data,
       };
       setHistory(saveHistoryItem(item));
-      // fire-and-forget server persist
       axios.post(`${API}/history`, item).catch(() => {});
       toast.success("Content generated successfully!");
     } catch (e) {
@@ -87,9 +92,7 @@ export default function Home() {
   };
 
   const handleGenerate = (data) => runGeneration(data, false);
-  const handleRegenerate = () => {
-    if (lastRequest) runGeneration(lastRequest, true);
-  };
+  const handleRegenerate = () => { if (lastRequest) runGeneration(lastRequest, true); };
   const handleRestore = (item) => {
     setContent(item.content);
     setLastRequest({ offer: item.offer, category: item.category, audience: item.audience, tone: item.tone, special_notes: item.special_notes });
@@ -102,85 +105,89 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-slate-50 relative overflow-hidden">
+      {/* Premium Ambient Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-200/40 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[-10%] w-[30%] h-[30%] rounded-full bg-orange-200/30 blur-[100px] pointer-events-none" />
+
       <Toaster position="top-center" richColors />
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+      {/* Frosted Glass Header */}
+      <header className="sticky top-0 z-40 bg-white/70 backdrop-blur-md border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.03)]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-11 w-11 bg-[#0B3D91] rounded-xl flex items-center justify-center shadow-md">
+          <div className="flex items-center gap-3 hover:-translate-y-0.5 transition-transform duration-300 cursor-pointer">
+            <div className="h-11 w-11 bg-gradient-to-br from-[#0B3D91] to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
               <span className="text-white font-black text-xl">T</span>
             </div>
             <div>
-              <h1 className="text-base sm:text-lg font-extrabold text-slate-900 font-heading leading-tight">
+              <h1 className="text-base sm:text-lg font-extrabold text-slate-900 font-heading leading-tight tracking-tight">
                 T.V Reddy Electronics
               </h1>
-              <p className="text-xs text-slate-500">Telugu Marketing AI · తెలుగు మార్కెటింగ్</p>
+              <p className="text-xs text-slate-500 font-medium">Telugu Marketing AI · తెలుగు మార్కెటింగ్</p>
             </div>
           </div>
           <HistoryDrawer history={history} onSelect={handleRestore} onDelete={handleDeleteHistory} />
         </div>
       </header>
 
-      {/* Main */}
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-8">
-        {/* Hero */}
-        <section className="text-center pt-2 pb-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-100 text-orange-800 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-            <Zap size={14} strokeWidth={2.5} /> Powered by Gemini AI
+      {/* Main Content */}
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8 md:py-12 space-y-8 relative z-10">
+        
+        {/* Hero Section */}
+        <section className="text-center pt-2 pb-4 animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-50 border border-orange-100 text-orange-700 rounded-full text-xs font-bold uppercase tracking-wider mb-5 shadow-sm">
+            <Zap size={14} strokeWidth={2.5} className="text-orange-500" /> Powered by Gemini AI
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 font-heading leading-tight">
-            Create Telugu Marketing in <span className="text-[#0B3D91]">60 seconds</span>
+          <h2 className="text-3xl sm:text-5xl font-black text-slate-900 font-heading leading-tight tracking-tight">
+            Create Telugu Marketing in <br className="hidden sm:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0B3D91] to-blue-500">60 seconds</span>
           </h2>
-          <p className="mt-3 text-base text-slate-600 max-w-md mx-auto font-telugu">
+          <p className="mt-4 text-base sm:text-lg text-slate-600 max-w-md mx-auto font-telugu leading-relaxed">
             WhatsApp, Facebook, Instagram కోసం professional తెలుగు content మరియు branded posters.
           </p>
         </section>
 
-        {/* Idea Radar (top position) */}
+        {/* Idea Radar */}
         {!loading && (
-          <IdeaRadar
-            recentOffers={history.slice(0, 20).map((h) => h.offer)}
-            onPick={(p) => setPrefill({ ...p, _t: Date.now() })}
-          />
+          <div className="transition-all duration-500 ease-in-out">
+            <IdeaRadar
+              recentOffers={history.slice(0, 20).map((h) => h.offer)}
+              onPick={(p) => setPrefill({ ...p, _t: Date.now() })}
+            />
+          </div>
         )}
 
-        {/* Form Card */}
+        {/* Form Card (Floating UI) */}
         {!loading && (
-          <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 md:p-7">
+          <section className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-8 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
             <InputForm onGenerate={handleGenerate} loading={loading || regenerating} prefill={prefill} />
           </section>
         )}
 
-        {/* Progress */}
+        {/* Progress & Output */}
         {loading && <ProgressBar step={step} />}
-
-        {/* Output */}
+        
+        {/* NEW: Added id="result-section" here */}
         {content && !loading && (
-          <section>
-            <ContentTabs
-              content={content}
-              setContent={setContent}
-              onRegenerate={handleRegenerate}
-              regenerating={regenerating}
-            />
+          <section id="result-section" className="animate-fade-in-up">
+            <ContentTabs content={content} setContent={setContent} onRegenerate={handleRegenerate} regenerating={regenerating} />
           </section>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="mt-16 border-t border-slate-200 bg-white/60">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 text-center text-sm text-slate-600 space-y-2">
-          <div className="font-bold text-slate-900 font-heading">{SHOP.name}</div>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <a href={`tel:${SHOP.phone}`} className="flex items-center gap-1.5 hover:text-[#0B3D91]">
-              <Phone size={14} strokeWidth={2.5} /> {SHOP.phone}
+      <footer className="mt-16 border-t border-slate-200/60 bg-slate-50/50 backdrop-blur-sm relative z-10">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 text-center text-sm text-slate-500 space-y-4">
+          <div className="font-bold text-slate-800 font-heading tracking-wide">{SHOP.name}</div>
+          <div className="flex items-center justify-center gap-6 flex-wrap font-medium">
+            <a href={`tel:${SHOP.phone}`} className="flex items-center gap-2 hover:text-[#0B3D91] transition-colors">
+              <Phone size={16} strokeWidth={2.5} /> {SHOP.phone}
             </a>
-            <a href={SHOP.maps} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 hover:text-[#0B3D91]">
-              <MapPin size={14} strokeWidth={2.5} /> {SHOP.location}
+            <a href={SHOP.maps} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-[#0B3D91] transition-colors">
+              <MapPin size={16} strokeWidth={2.5} /> {SHOP.location}
             </a>
           </div>
+          <p className="pt-2">&copy; 2026 T.V Reddy Electronics. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -37,7 +37,6 @@ export const InputForm = ({ onGenerate, loading, prefill }) => {
     if (prefill.special_notes !== undefined) setNotes(prefill.special_notes);
     // Smooth scroll form into view
     setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
-  }, [prefill]);
 
   // Auto-save draft
   useEffect(() => {
@@ -62,11 +61,11 @@ export const InputForm = ({ onGenerate, loading, prefill }) => {
   const fest = upcomingFestival();
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {fest && (
-        <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-900 px-4 py-3 rounded-xl">
-          <Sparkle size={18} strokeWidth={2.5} />
-          <span className="text-sm font-semibold">
+        <div className="flex items-center gap-3 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200/60 text-orange-800 px-5 py-3.5 rounded-2xl shadow-sm transition-all animate-fade-in-up">
+          <Sparkle size={20} strokeWidth={2.5} className="text-orange-500 animate-pulse" />
+          <span className="text-sm font-semibold tracking-wide">
             {fest.name} is {fest.daysAway === 0 ? "today" : `${fest.daysAway} days away`} — Festive tone suggested
           </span>
         </div>
@@ -74,10 +73,10 @@ export const InputForm = ({ onGenerate, loading, prefill }) => {
 
       {/* Offer with voice */}
       <div>
-        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">
-          Offer / Product Description <span className="text-red-600">*</span>
+        <label className="block text-xs font-bold text-slate-600 mb-2.5 uppercase tracking-wider">
+          Offer / Product Description <span className="text-red-500">*</span>
         </label>
-        <div className="flex items-start gap-2 bg-slate-50 rounded-xl border-2 border-slate-200 focus-within:border-[#0B3D91] focus-within:bg-white transition-colors p-2">
+        <div className="flex items-start gap-2 bg-slate-50/50 backdrop-blur-sm rounded-2xl border border-slate-200 focus-within:border-[#0B3D91]/50 focus-within:ring-4 focus-within:ring-[#0B3D91]/10 focus-within:bg-white transition-all duration-300 p-2 shadow-sm">
           <textarea
             data-testid={APP.offerInput}
             value={offer}
@@ -85,47 +84,49 @@ export const InputForm = ({ onGenerate, loading, prefill }) => {
             placeholder="e.g. Samsung 43 inch Smart TV Festival Offer"
             maxLength={250}
             rows={3}
-            className="flex-1 bg-transparent text-lg text-slate-900 placeholder:text-slate-400 p-2 focus:outline-none resize-none font-telugu"
+            className="flex-1 bg-transparent text-lg text-slate-800 placeholder:text-slate-400 p-2 focus:outline-none resize-none font-telugu"
           />
           <VoiceInput onResult={(t) => setOffer((prev) => (prev ? prev + " " + t : t).slice(0, 250))} disabled={loading} />
         </div>
-        <p className="text-xs text-slate-500 mt-1">{offer.length}/250 · Tip: Tap the mic to speak in Telugu</p>
+        <p className="text-xs text-slate-400 mt-2 font-medium pl-1">{offer.length}/250 · Tip: Tap the mic to speak in Telugu</p>
       </div>
 
-      {/* Category */}
-      <div>
-        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Product Category</label>
-        <select
-          data-testid={APP.categorySelect}
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="h-14 w-full bg-slate-50 rounded-xl border-2 border-slate-200 focus:border-[#0B3D91] focus:bg-white outline-none px-4 text-lg text-slate-900 transition-colors"
-        >
-          {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-        </select>
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+        {/* Category */}
+        <div>
+          <label className="block text-xs font-bold text-slate-600 mb-2.5 uppercase tracking-wider">Product Category</label>
+          <select
+            data-testid={APP.categorySelect}
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="h-14 w-full bg-slate-50/50 backdrop-blur-sm rounded-2xl border border-slate-200 focus:border-[#0B3D91]/50 focus:ring-4 focus:ring-[#0B3D91]/10 focus:bg-white outline-none px-4 text-base font-medium text-slate-800 transition-all duration-300 shadow-sm cursor-pointer"
+          >
+            {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+          </select>
+        </div>
 
-      {/* Audience */}
-      <div>
-        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Target Audience</label>
-        <select
-          data-testid={APP.audienceSelect}
-          value={audience}
-          onChange={(e) => setAudience(e.target.value)}
-          className="h-14 w-full bg-slate-50 rounded-xl border-2 border-slate-200 focus:border-[#0B3D91] focus:bg-white outline-none px-4 text-lg text-slate-900 transition-colors"
-        >
-          {AUDIENCES.map((a) => <option key={a.value} value={a.value}>{a.label}</option>)}
-        </select>
+        {/* Audience */}
+        <div>
+          <label className="block text-xs font-bold text-slate-600 mb-2.5 uppercase tracking-wider">Target Audience</label>
+          <select
+            data-testid={APP.audienceSelect}
+            value={audience}
+            onChange={(e) => setAudience(e.target.value)}
+            className="h-14 w-full bg-slate-50/50 backdrop-blur-sm rounded-2xl border border-slate-200 focus:border-[#0B3D91]/50 focus:ring-4 focus:ring-[#0B3D91]/10 focus:bg-white outline-none px-4 text-base font-medium text-slate-800 transition-all duration-300 shadow-sm cursor-pointer"
+          >
+            {AUDIENCES.map((a) => <option key={a.value} value={a.value}>{a.label}</option>)}
+          </select>
+        </div>
       </div>
 
       {/* Tone */}
       <div>
-        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Tone</label>
+        <label className="block text-xs font-bold text-slate-600 mb-2.5 uppercase tracking-wider">Tone</label>
         <select
           data-testid={APP.toneSelect}
           value={tone}
           onChange={(e) => setTone(e.target.value)}
-          className="h-14 w-full bg-slate-50 rounded-xl border-2 border-slate-200 focus:border-[#0B3D91] focus:bg-white outline-none px-4 text-lg text-slate-900 transition-colors"
+          className="h-14 w-full bg-slate-50/50 backdrop-blur-sm rounded-2xl border border-slate-200 focus:border-[#0B3D91]/50 focus:ring-4 focus:ring-[#0B3D91]/10 focus:bg-white outline-none px-4 text-base font-medium text-slate-800 transition-all duration-300 shadow-sm cursor-pointer"
         >
           {TONES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
@@ -133,8 +134,8 @@ export const InputForm = ({ onGenerate, loading, prefill }) => {
 
       {/* Notes */}
       <div>
-        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">
-          Special Notes <span className="text-slate-400 font-normal normal-case">(optional)</span>
+        <label className="block text-xs font-bold text-slate-600 mb-2.5 uppercase tracking-wider">
+          Special Notes <span className="text-slate-400 font-normal normal-case ml-1">(optional)</span>
         </label>
         <input
           data-testid={APP.notesInput}
@@ -142,7 +143,7 @@ export const InputForm = ({ onGenerate, loading, prefill }) => {
           value={notes}
           onChange={(e) => setNotes(e.target.value.slice(0, 150))}
           placeholder="e.g. Free Installation, No Cost EMI, Exchange Available"
-          className="h-14 w-full bg-slate-50 rounded-xl border-2 border-slate-200 focus:border-[#0B3D91] focus:bg-white outline-none px-4 text-lg text-slate-900 transition-colors font-telugu"
+          className="h-14 w-full bg-slate-50/50 backdrop-blur-sm rounded-2xl border border-slate-200 focus:border-[#0B3D91]/50 focus:ring-4 focus:ring-[#0B3D91]/10 focus:bg-white outline-none px-4 text-base text-slate-800 transition-all duration-300 shadow-sm font-telugu"
         />
       </div>
 
@@ -150,10 +151,10 @@ export const InputForm = ({ onGenerate, loading, prefill }) => {
         type="submit"
         data-testid={APP.generateBtn}
         disabled={!canSubmit}
-        className="h-16 w-full bg-[#0B3D91] hover:bg-[#093070] disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xl font-bold rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 font-heading"
+        className="w-full mt-4 py-4 px-4 bg-gradient-to-r from-[#0B3D91] to-blue-600 text-white rounded-2xl font-bold text-lg shadow-[0_4px_20px_rgba(11,61,145,0.3)] hover:shadow-[0_8px_25px_rgba(11,61,145,0.4)] hover:-translate-y-1 transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-3 font-heading"
       >
-        <Sparkles size={24} strokeWidth={2.5} />
-        {loading ? "Generating..." : "Generate AI Content"}
+        <Sparkles size={24} strokeWidth={2.5} className={loading ? "animate-spin" : ""} />
+        {loading ? "Generating Magic..." : "Generate AI Content"}
       </button>
     </form>
   );
