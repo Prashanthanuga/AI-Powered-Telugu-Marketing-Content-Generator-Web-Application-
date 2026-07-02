@@ -12,7 +12,7 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+import litellm
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -21,7 +21,7 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 
 app = FastAPI(title="T.V Reddy Marketing Generator API")
 api_router = APIRouter(prefix="/api")
@@ -148,15 +148,17 @@ def extract_json(text: str) -> dict:
 
 
 async def call_gemini(system_prompt: str, user_prompt: str, session_id: str) -> str:
-    if not EMERGENT_LLM_KEY:
+    if not GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="AI service not configured")
-    chat = LlmChat(
-        api_key=EMERGENT_LLM_KEY,
-        session_id=session_id,
-        system_message=system_prompt,
-    ).with_model("gemini", "gemini-2.5-flash")
-    response = await chat.send_message(UserMessage(text=user_prompt))
-    return response
+    response = await litellm.acompletion(
+        model="gemini/gemini-2.5-flash",
+        api_key=GEMINI_API_KEY,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+    )
+    return response.choices[0].message.content
 
 
 # ===================== ROUTES =====================

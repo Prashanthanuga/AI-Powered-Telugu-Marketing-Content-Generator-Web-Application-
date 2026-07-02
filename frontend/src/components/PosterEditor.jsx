@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { Poster } from "./Poster";
@@ -8,9 +8,8 @@ import { toast } from "sonner";
 import { APP } from "@/constants/testIds";
 import { devError } from "@/utils/logger";
 
-const captureCanvas = async (node, scale) => {
+const captureCanvas = async (node) => {
   if (document.fonts?.ready) await document.fonts.ready;
-  // Wait for all <img> inside the node to fully decode so html2canvas captures them
   const imgs = Array.from(node.querySelectorAll("img"));
   await Promise.all(imgs.map((img) => {
     if (img.complete && img.naturalWidth) return img.decode ? img.decode().catch(() => {}) : Promise.resolve();
@@ -19,7 +18,16 @@ const captureCanvas = async (node, scale) => {
       img.onerror = () => res();
     });
   }));
-  return html2canvas(node, { scale, useCORS: true, allowTaint: true, backgroundColor: null, logging: false });
+  // Force layout flush + brief tick so useLayoutEffect (auto-fit) settles
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  return html2canvas(node, {
+    scale: 1,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: null,
+    logging: false,
+    windowWidth: 1080,
+  });
 };
 
 export const PosterEditor = ({ content, setContent }) => {
@@ -33,6 +41,7 @@ export const PosterEditor = ({ content, setContent }) => {
   const [offsetX, setOffsetX] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
   const posterRef = useRef(null);
+  const captureRef = useRef(null);
   const fileInputRef = useRef(null);
 
   const imgTransform = { zoom, offsetX, offsetY };
@@ -50,11 +59,10 @@ export const PosterEditor = ({ content, setContent }) => {
   };
 
   const download = async () => {
-    if (!posterRef.current) return;
+    if (!captureRef.current) return;
     setDownloading(true);
     try {
-      const scale = size === "story" ? 2.25 : 2.7;
-      const canvas = await captureCanvas(posterRef.current, scale);
+      const canvas = await captureCanvas(captureRef.current);
       const link = document.createElement("a");
       const stamp = new Date().toISOString().slice(0, 10);
       link.download = `tvreddy-${template}-${size}-${stamp}.png`;
@@ -70,15 +78,15 @@ export const PosterEditor = ({ content, setContent }) => {
   };
 
   const downloadPdf = async () => {
-    if (!posterRef.current) return;
+    if (!captureRef.current) return;
     setPdfBusy(true);
     try {
-      const canvas = await captureCanvas(posterRef.current, 2.5);
+      const canvas = await captureCanvas(captureRef.current);
       const img = canvas.toDataURL("image/png");
       const isStory = size === "story";
       const w = isStory ? 108 : 200;
       const h = isStory ? 192 : 200;
-      const pdf = new jsPDF({ orientation: isStory ? "portrait" : "portrait", unit: "mm", format: [w, h] });
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [w, h] });
       pdf.addImage(img, "PNG", 0, 0, w, h);
       pdf.save(`tvreddy-${template}-${size}-${new Date().toISOString().slice(0, 10)}.pdf`);
       toast.success("Poster PDF downloaded!");
@@ -218,11 +226,33 @@ export const PosterEditor = ({ content, setContent }) => {
         </div>
       )}
 
-      {/* Preview */}
+      {/* Preview — renders the exact same 1080px Poster, visually scaled down to fit */}
       <div className="bg-slate-100 rounded-2xl p-4">
-        <div className="max-w-md mx-auto" data-testid={APP.posterPreview}>
+        <ScaledPreview size={size} testId={APP.posterPreview}>
           <Poster
             ref={posterRef}
+            template={template}
+            content={content}
+            productImage={productImage}
+            size={size}
+            qrMode={qrMode}
+            imgTransform={imgTransform}
+          />
+        </ScaledPreview>
+      </div>
+
+      {/* Hidden pixel-perfect capture container (1:1 at 1080px, offscreen). */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          left: "-99999px",
+          top: 0,
+          pointerEvents: "none",
+        }}
+      >
+        <div ref={captureRef}>
+          <Poster
             template={template}
             content={content}
             productImage={productImage}
@@ -247,6 +277,40 @@ export const PosterEditor = ({ content, setContent }) => {
           {pdfBusy ? <RefreshCw size={20} strokeWidth={2.5} className="animate-spin" /> : <FileText size={20} strokeWidth={2.5} />}
           {pdfBusy ? "Preparing..." : "Download PDF"}
         </button>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Renders a fixed 1080px-wide child but visually scales it down (CSS transform) to fit
+ * the available container width, so the on-screen preview shows an exact miniature of
+ * the pixel-perfect DOM that gets captured for PNG/PDF download.
+ */
+const ScaledPreview = ({ children, size, testId }) => {
+  const wrapRef = useRef(null);
+  const [scale, setScale] = useState(0.4);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth;
+      if (w > 0) setScale(w / 1080);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const posterH = size === "story" ? 1920 : 1080;
+  return (
+    <div ref={wrapRef} className="max-w-md mx-auto w-full" data-testid={testId}>
+      <div style={{ width: "100%", height: posterH * scale, overflow: "hidden" }}>
+        <div style={{ width: 1080, height: posterH, transform: `scale(${scale})`, transformOrigin: "top left" }}>
+          {children}
+        </div>
       </div>
     </div>
   );
