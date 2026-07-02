@@ -196,7 +196,7 @@ async def generate_content(req: GenerateRequest):
 
 class IdeaRequest(BaseModel):
     recent_offers: List[str] = []
-    count: int = 5
+    count: int = 4
 
 class IdeaItem(BaseModel):
     title: str
@@ -212,67 +212,34 @@ class IdeaResponse(BaseModel):
     ideas: List[IdeaItem]
 
 
-IDEA_SYSTEM_PROMPT = """You are a Telugu marketing strategist for T.V Reddy Electronics, a local electronics shop in Thorrur, Telangana (villages nearby: Mahabubabad, Maripeda, Narsimhulapet, Kesamudram, Dornakal). Buyers are farmers, families, students, government employees, first-time buyers.
+IDEA_SYSTEM_PROMPT = """You are a Telugu marketing strategist for T.V Reddy Electronics in తొర్రూరు (Thorrur), Telangana. Buyers: farmers, families, students, government employees, first-time buyers from nearby villages మరిపేడ, నర్సింహులపేట, కేసముద్రం, డోర్నకల్.
 
-Your job: propose FRESH, LOCALLY-RELEVANT marketing angle ideas that consider the current month/season, farming cycle, festival calendar, cricket season, school year, weather, and social occasions — angles the shop owner has NOT posted recently.
+Propose FRESH marketing angle ideas — each with a different angle, category and tone from the others in the same response, and semantically different from any offers the user already posted.
 
-CRITICAL TELUGU SPELLINGS (use EXACTLY, no other variants):
-- Thorrur = "తొర్రూరు" (NEVER "తలారు" or any other spelling)
-- Warangal = "వరంగల్", Mahabubabad = "మహబూబాబాద్", Khammam = "ఖమ్మం"
-- Maripeda = "మరిపేడ", Narsimhulapet = "నర్సింహులపేట", Kesamudram = "కేసముద్రం", Dornakal = "డోర్నకల్"
-- Telangana = "తెలంగాణ"
+Angle examples (English label, 2-4 words): "Post-Harvest Celebration", "Summer AC Push", "Monsoon Appliance Care", "Wedding Gift Season", "Student Back-to-School", "Cricket TV Upgrade", "DTH Recharge", "Exchange Offer", "EMI Comfort", "Farmer Utility", "Weekend Family Deal", "New Launch".
 
-RULES:
-- Every idea targets a DIFFERENT angle from the others in the same response. Examples of angle labels: "Post-Harvest Celebration", "Summer AC Push", "Monsoon Appliance Care", "Wedding Gift Season", "Student Back-to-School", "Cricket World Cup TV Upgrade", "DTH Recharge Reminder", "Exchange Old for New", "EMI Comfort", "Farmer Utility", "Trust & After-Sales", "Weekend Family Deal", "New Product Launch", "First-Time Buyer Guide".
-- Vary CATEGORY across ideas (TV, Mobile, Refrigerator, Washing Machine, AC, Kitchen Appliance, Accessories, Home Appliance, TV Repair, DTH Connection).
-- Vary TONE across ideas (Festive, Urgent, Informative, Celebration, Friendly, Trust Building).
-- Avoid semantic duplicates of the "recent_offers" list provided by the user.
+CATEGORY (Telugu descriptor, brand names in English): pick from TV, Mobile, Refrigerator, Washing Machine, AC, Kitchen Appliance, Accessories, Home Appliance, TV Repair, DTH Connection.
 
-LANGUAGE RULES (VERY IMPORTANT):
-- `title`, `hook`, `category`, `reasoning`, and `target_audience` MUST ALL be in TELUGU SCRIPT (95% Telugu). Only brand names and unavoidable technical terms (Samsung, LG, TV, LED, Smart TV, EMI, WiFi, AC, DTH, UPS, Wi-Fi) stay in English.
-- Do NOT use Roman Telugu (Tenglish). Always Telugu script.
-- When referencing the town, always use "తొర్రూరు".
-- Reasoning: 1-2 sentences in Telugu explaining why NOW and why for THIS audience.
-- target_audience: crisp Telugu phrase describing the buyer.
-- `angle` label stays in English (short 2-4 words, used as a tag).
-- `tone` stays in English (must be exactly one of: Festive, Urgent, Informative, Celebration, Friendly, Trust Building).
+TONE (exact English value): Festive, Urgent, Informative, Celebration, Friendly, or Trust Building.
 
-- Scores are self-rated 1-10:
-  * relevance: how timely / how urgent this angle is right now
-  * local: how locally relevant to Thorrur/nearby villages
-  * awareness: how much it lifts shop awareness / recall
+CRITICAL SPELLINGS: Thorrur = తొర్రూరు (NEVER తలారు). Warangal = వరంగల్. Mahabubabad = మహబూబాబాద్. Khammam = ఖమ్మం.
 
-OUTPUT: Return ONLY valid JSON, no markdown fences:
-{
-  "ideas": [
-    {
-      "angle": "short English angle label, max 4 words",
-      "category": "Telugu product/service category descriptor (brand/tech terms in English OK)",
-      "title": "catchy Telugu title, max 12 words in Telugu script",
-      "hook": "one-line Telugu hook, max 22 words in Telugu script",
-      "reasoning": "1-2 sentence TELUGU rationale — why now, why local, why this audience",
-      "target_audience": "Telugu phrase describing the buyer (e.g. 'తొర్రూరు చుట్టుపక్కల రైతులు మరియు కుటుంబాలు')",
-      "tone": "one of: Festive, Urgent, Informative, Celebration, Friendly, Trust Building",
-      "scores": { "relevance": 10, "local": 10, "awareness": 9 }
-    }
-  ]
-}"""
+Title, hook, category, reasoning, target_audience MUST be Telugu script (only brand/tech words in English). Reasoning: 1 sentence in Telugu — why now, why local.
+
+Scores 1-10: relevance (timeliness), local (Thorrur relevance), awareness (recall lift).
+
+Return ONLY compact JSON, no markdown:
+{"ideas":[{"angle":"...","category":"...","title":"...","hook":"...","reasoning":"...","target_audience":"...","tone":"...","scores":{"relevance":10,"local":10,"awareness":9}}]}"""
 
 
 @api_router.post("/ideas", response_model=IdeaResponse)
 async def suggest_ideas(req: IdeaRequest):
     session_id = f"idea-{uuid.uuid4()}"
     count = max(3, min(req.count, 8))
-    recent_text = "\n".join(f"- {o}" for o in req.recent_offers[:20]) or "(none yet)"
+    recent_text = ", ".join(req.recent_offers[:10]) or "(none yet)"
     now = datetime.now(timezone.utc)
-    ctx = f"Current date: {now.strftime('%B %d, %Y')} (month: {now.strftime('%B')}). Consider current season, farming cycle, and upcoming festivals when choosing angles."
-    user_prompt = f"""{ctx}
-
-Propose {count} FRESH marketing angle ideas. Each MUST have a DIFFERENT angle label, DIFFERENT category or tone, and be semantically different from these RECENT offers already posted:
-
-{recent_text}
-
-Return the JSON with exactly {count} rich idea objects (angle, category, title, hook, reasoning, target_audience, tone, scores)."""
+    ctx = f"Month: {now.strftime('%B %Y')}."
+    user_prompt = f"{ctx} Recent offers to AVOID duplicating: {recent_text}. Return exactly {count} distinct ideas."
 
     last_err = None
     for attempt in range(2):

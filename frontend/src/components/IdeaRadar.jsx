@@ -8,6 +8,22 @@ import { devError } from "@/utils/logger";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+const CACHE_KEY = "tvreddy-ideas-cache";
+const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6 hours
+
+const readCache = () => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ts || Date.now() - parsed.ts > CACHE_TTL_MS) return null;
+    return parsed.ideas || null;
+  } catch { return null; }
+};
+const writeCache = (ideas) => {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), ideas })); } catch (e) { /* ignore */ }
+};
+
 const ScorePill = ({ label, value }) => {
   const v = Math.max(0, Math.min(10, Number(value) || 0));
   const color = v >= 9 ? "bg-green-500" : v >= 7 ? "bg-yellow-500" : "bg-slate-400";
@@ -25,31 +41,38 @@ const ScorePill = ({ label, value }) => {
  * Trending Idea Radar — rich cards with angle, reasoning, scores, target audience.
  */
 export const IdeaRadar = ({ recentOffers = [], onPick, autoLoad = true }) => {
+  const cached = readCache();
   const [loading, setLoading] = useState(false);
-  const [ideas, setIdeas] = useState([]);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [ideas, setIdeas] = useState(cached || []);
+  const [hasLoaded, setHasLoaded] = useState(Boolean(cached));
 
-  const fetchIdeas = async () => {
-    setLoading(true);
+  const fetchIdeas = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const resp = await axios.post(`${API}/ideas`, {
         recent_offers: recentOffers,
-        count: 6,
+        count: 4,
       }, { timeout: 55000 });
-      setIdeas(resp.data.ideas || []);
+      const list = resp.data.ideas || [];
+      setIdeas(list);
+      writeCache(list);
       setHasLoaded(true);
     } catch (e) {
       devError(e);
-      toast.error("Couldn't fetch ideas. Please try again.");
+      if (!silent) toast.error("Couldn't fetch ideas. Please try again.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
-  // Auto-load once on mount when requested
+  // Auto-load: if we have cache, refresh silently in background; else fetch visibly
   useEffect(() => {
-    if (autoLoad && !hasLoaded && !loading) {
-      fetchIdeas();
+    if (!autoLoad) return;
+    if (cached) {
+      // Show cached instantly, refresh in background
+      fetchIdeas(true);
+    } else {
+      fetchIdeas(false);
     }
   }, []);
 
@@ -85,7 +108,7 @@ export const IdeaRadar = ({ recentOffers = [], onPick, autoLoad = true }) => {
         </div>
         <button
           type="button"
-          onClick={fetchIdeas}
+          onClick={() => fetchIdeas(false)}
           disabled={loading}
           data-testid={APP.ideaRadarBtn}
           className="h-11 px-4 bg-[#F59E0B] hover:bg-[#D97706] disabled:opacity-70 text-white text-sm font-bold rounded-xl flex items-center gap-2 transition-colors shrink-0"
