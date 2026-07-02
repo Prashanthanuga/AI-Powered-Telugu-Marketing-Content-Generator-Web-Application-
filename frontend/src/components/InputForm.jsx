@@ -1,3 +1,5 @@
+// Forcing Vercel to update
+
 import React, { useState, useEffect } from "react";
 import { Sparkles, Sparkle } from "lucide-react";
 import { VoiceInput } from "./VoiceInput";
