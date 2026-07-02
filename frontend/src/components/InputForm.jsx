@@ -35,8 +35,7 @@ export const InputForm = ({ onGenerate, loading, prefill }) => {
     if (prefill.category) setCategory(prefill.category);
     if (prefill.tone) setTone(prefill.tone);
     if (prefill.special_notes !== undefined) setNotes(prefill.special_notes);
-    // Smooth scroll form into view
-    setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
+  }, [prefill]);
 
   // Auto-save draft
   useEffect(() => {
