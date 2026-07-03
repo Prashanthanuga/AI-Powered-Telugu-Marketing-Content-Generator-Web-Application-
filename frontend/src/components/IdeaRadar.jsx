@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { APP } from "@/constants/testIds";
 import { devError } from "@/utils/logger";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// 🚀 NUCLEAR OPTION: Hardcoded Render Backend URL
+const API = "https://ai-powered-telugu-marketing-content.onrender.com/api";
 
 const CACHE_KEY = "tvreddy-ideas-cache";
 const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6 hours
