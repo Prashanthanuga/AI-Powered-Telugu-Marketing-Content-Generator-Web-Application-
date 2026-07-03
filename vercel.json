@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://ai-powered-telugu-marketing-content.onrender.com/api/$1"
+    }
+  ]
+}
