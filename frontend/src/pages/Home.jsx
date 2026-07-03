@@ -12,8 +12,8 @@ import { loadHistory, saveHistoryItem, deleteHistoryItem, findSimilar } from "@/
 import { SHOP, PROGRESS_STEPS } from "@/utils/constants";
 import { Zap, MapPin, Phone } from "lucide-react";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// 🚀 NUCLEAR OPTION: Hardcoded Render Backend URL
+const API = "https://ai-powered-telugu-marketing-content.onrender.com/api";
 
 export default function Home() {
   const [loading, setLoading] = useState(false);
